@@ -11,23 +11,9 @@ module.exports = {
   ],
 
   rules: {
-    semi: ['error', 'always'],
-    'comma-dangle': ['error', 'always-multiline'],
-    indent: ['error', 2, { SwitchCase: 1 }],
-    quotes: ['error', 'single'],
-    'object-curly-spacing': ['warn', 'always', { 'arraysInObjects': false }],
-    'no-debugger': 'off',
-    'object-shorthand': 'error',
-    'space-before-function-paren': ['error', 'never'],
-    'keyword-spacing': 'error',
-    'vue/html-indent': ['error', 2, { alignAttributesVertically: false }],
-    'vue/html-closing-bracket-newline': ['error', {
-      singleline: 'never',
-      multiline: 'always',
-    }],
-    'vue/html-self-closing': 'error',
-    'vue/mustache-interpolation-spacing': 'error',
-    'template-curly-spacing': 'error',
+      'no-debugger': 'off',
+      'no-var': 'off',
+      'no-console': 'off',
   },
 
   parserOptions: {

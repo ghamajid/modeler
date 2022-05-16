@@ -643,7 +643,7 @@ export default {
       }
 
       const node = this.createNode(type, definition, diagram);
-
+     // console.log(node,'node');
       store.commit('addNode', node);
     },
     createNode(type, definition, diagram) {
@@ -683,6 +683,7 @@ export default {
     },
     async loadXML(xml = this.currentXML) {
       this.definitions = await this.xmlManager.getDefinitionsFromXml(xml);
+
       this.xmlManager.definitions = this.definitions;
       this.nodeIdGenerator = new NodeIdGenerator(this.definitions);
       store.commit('clearNodes');

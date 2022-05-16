@@ -149,6 +149,8 @@ export default {
     this.shape.resize(bounds.width, bounds.height);
     setupCompensationMarker(this.node.definition, this.markers, this.$set, this.$delete);
     setupLoopCharacteristicsMarkers(this.node.definition, this.markers, this.$set, this.$delete);
+    //console.log(this.node.definition.get('id'),'this.node.definition');
+    ///console.log(this.shape,'shape');
     this.shape.attr({
       body: {
         rx: 8,
@@ -157,6 +159,7 @@ export default {
       label: {
         text: util.breakText(this.node.definition.get('name'), { width: bounds.width }),
         fill: 'black',
+        id: this.node.definition.get('id'),
       },
     });
 
