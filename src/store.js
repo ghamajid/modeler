@@ -135,7 +135,6 @@ export default new Vuex.Store({
           },
         });
         commit('setGlobalProcesses', data.data);
-        window.ProcessMaker.globalProcesses = data.data;
       } catch (error) {
         /* Ignore error */
       }

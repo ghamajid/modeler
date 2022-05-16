@@ -3,6 +3,8 @@ import SubProcessFormSelect from './SubProcessFormSelect';
 import nameConfigSettings from '@/components/inspectors/nameConfigSettings';
 import { taskHeight, taskWidth } from '@/components/nodes/task/taskConfig';
 import advancedAccordionConfig from '@/components/inspectors/advancedAccordionConfig';
+import loopCharacteristicsInspector from '@/components/inspectors/LoopCharacteristics';
+import { loopCharacteristicsHandler, loopCharacteristicsData } from '@/components/inspectors/LoopCharacteristics';
 import documentationAccordionConfig from '@/components/inspectors/documentationAccordionConfig';
 import defaultNames from '@/components/nodes/task/defaultNames';
 
@@ -33,14 +35,15 @@ export default {
       }),
     });
   },
-  inspectorHandler(value, node, setNodeProp) {
+  inspectorHandler(value, node, setNodeProp, moddle, definitions) {
 
+    value = loopCharacteristicsHandler(value, node, setNodeProp, moddle, definitions);
+  
     setNodeProp(node, 'id', value.id);
     setNodeProp(node, 'name', value.name);
 
     const currentConfig = JSON.parse(value.config);
 
-    value['calledElement'] = currentConfig.calledElement;
     setNodeProp(node, 'calledElement', currentConfig.calledElement);
 
     if (currentConfig.name !== value.name) {
@@ -49,6 +52,11 @@ export default {
 
     setNodeProp(node, 'config', JSON.stringify(currentConfig));
 
+  },
+  inspectorData(node, defaultDataTransform, inspector) {
+    const inspectorData = defaultDataTransform(node);
+    loopCharacteristicsData(inspectorData, node, defaultDataTransform, inspector);
+    return inspectorData;
   },
   inspectorConfig: [
     {
@@ -76,6 +84,7 @@ export default {
             },
           ],
         },
+        loopCharacteristicsInspector,
         documentationAccordionConfig,
         advancedAccordionConfig,
       ],

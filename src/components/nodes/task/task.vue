@@ -151,18 +151,18 @@ export default {
     setupLoopCharacteristicsMarkers(this.node.definition, this.markers, this.$set, this.$delete);
     //console.log(this.node.definition.get('id'),'this.node.definition');
     ///console.log(this.shape,'shape');
-    this.shape.attr({
+    //console.log(this.node.definition.$type,'shape');
+      this.shape.attr({
       body: {
         rx: 8,
-        ry: 8,
+        ry: 8
       },
       label: {
         text: util.breakText(this.node.definition.get('name'), { width: bounds.width }),
         fill: 'black',
-        id: this.node.definition.get('id'),
+        element_id_personal: this.node.definition.get('id'),
       },
     });
-
     this.shape.addTo(this.graph);
     this.shape.component = this;
   },

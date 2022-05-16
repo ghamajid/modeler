@@ -12,7 +12,6 @@
       optionContent="name"
       class="p-0 mb-2"
       validation="required"
-      @open="loadProcesses"
     />
 
     <form-multi-select
@@ -58,11 +57,11 @@ export default {
   props: ['value'],
   computed: {
     processList() {
-      return this.filterValidProcesses(store.getters.globalProcesses) || [];
+      return store.getters.globalProcesses || [];
     },
     startEventList() {
       if (!this.selectedProcess) { return []; }
-      return this.filterValidStartEvents(this.selectedProcess.events);
+      return this.selectedProcess.events;
     },
   },
   watch: {
@@ -89,32 +88,6 @@ export default {
     },
   },
   methods: {
-    filterValidProcesses(processes) {
-      return processes.filter(process => {
-        return this.filterValidStartEvents(process.events).length > 0;
-      });
-    },
-    filterValidStartEvents(events) {
-      return events.filter(event => {
-        // Should not have event definitions like (signal, message, timer, ...)
-        if (event.eventDefinitions && event.eventDefinitions.length > 0) {
-          return false;
-        }
-        // Should not be a web entry
-        if (event.config) {
-          try {
-            const config = JSON.parse(event.config);
-            if (config.web_entry) {
-              return false;
-            }
-          } catch (e) {
-            // Invalid config property
-            return false;
-          }
-        }
-        return true;
-      });
-    },
     loadBpmnValues() {
       if (!this.config.processId || !this.config.startEvent) {
         return;
@@ -150,13 +123,10 @@ export default {
     containsMultipleProcesses(process) {
       return uniqBy(process.events, 'ownerProcessId').length > 1;
     },
-    loadProcesses() {
-      store.dispatch('fetchGlobalProcesses');
-    },
   },
   created() {
     if (this.processList.length === 0) {
-      this.loadProcesses();
+      store.dispatch('fetchGlobalProcesses');
     } else {
       this.loadBpmnValues();
     }

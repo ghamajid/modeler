@@ -143,10 +143,9 @@ import setUpSelectionBox from '@/components/modeler/setUpSelectionBox';
 import TimerEventNode from '@/components/nodes/timerEventNode';
 import focusNameInputAndHighlightLabel from '@/components/modeler/focusNameInputAndHighlightLabel';
 import XMLManager from '@/components/modeler/XMLManager';
-import { removeNodeFlows, removeNodeMessageFlows, removeNodeAssociations, removeOutgoingAndIncomingRefsToFlow, removeBoundaryEvents, removeSourceDefault } from '@/components/crown/utils';
+import { removeOutgoingAndIncomingRefsToFlow, removeBoundaryEvents, removeSourceDefault, removePoolElements } from '@/components/crown/utils';
 import { getInvalidNodes } from '@/components/modeler/modelerUtils';
 import { NodeMigrator } from '@/components/modeler/NodeMigrator';
-import addLoopCharacteristics from '@/setup/addLoopCharacteristics';
 
 import ProcessmakerModelerGenericFlow from '@/components/nodes/genericFlow/genericFlow';
 
@@ -349,9 +348,6 @@ export default {
       });
     },
     async validateBpmnDiagram() {
-      if (!store.getters.globalProcesses || store.getters.globalProcesses.length === 0) {
-        await store.dispatch('fetchGlobalProcesses');
-      }
       this.validationErrors = await this.linter.lint(this.definitions);
       this.$emit('validate', this.validationErrors);
     },
@@ -446,7 +442,6 @@ export default {
       };
 
       this.translateConfig(nodeType.inspectorConfig[0]);
-      addLoopCharacteristics(nodeType);
       this.nodeRegistry[nodeType.id] = nodeType;
 
       Vue.component(nodeType.id, nodeType.component);
@@ -650,12 +645,7 @@ export default {
       if (Node.isTimerType(type)) {
         return new TimerEventNode(type, definition, diagram);
       }
-      // Remove undefined or null properties
-      Object.keys(definition).forEach(key => {
-        if (definition[key] === undefined || definition[key] === null) {
-          delete definition[key];
-        }
-      });
+
       return new Node(type, definition, diagram);
     },
     hasSourceAndTarget(definition) {
@@ -801,18 +791,13 @@ export default {
         });
       });
     },
-    async removeNode(node, { removeRelationships = true } = {}) {
-      if (removeRelationships) {
-        removeNodeFlows(node, this);
-        removeNodeMessageFlows(node, this);
-        removeNodeAssociations(node, this);
-      }
+    async removeNode(node) {
       removeOutgoingAndIncomingRefsToFlow(node);
       removeBoundaryEvents(this.graph, node, this.removeNode);
       removeSourceDefault(node);
+      removePoolElements(this.graph, node, this.removeNode);
 
-      this.removeNodesFromLane(node);
-      this.removeNodesFromPool(node);
+      this.removeNodeFromLane(node);
       store.commit('removeNode', node);
       store.commit('highlightNode', this.processNode);
       await this.$nextTick();
@@ -828,7 +813,7 @@ export default {
             nodeThatWillBeReplaced: node,
           });
 
-          await this.removeNode(node, { removeRelationships: false });
+          await this.removeNode(node);
           this.highlightNode(newNode);
         });
       });
@@ -851,7 +836,7 @@ export default {
       undoRedoStore.commit('enableSavingState');
       this.pushToUndoStack();
     },
-    removeNodesFromLane(node) {
+    removeNodeFromLane(node) {
       const containingLane = node.pool && node.pool.component.laneSet &&
         node.pool.component.laneSet.get('lanes').find(lane => {
           return lane.get('flowNodeRef').includes(node.definition);
@@ -862,26 +847,6 @@ export default {
       }
 
       pull(containingLane.get('flowNodeRef'), node.definition);
-    },
-    removeNodesFromPool(node) {
-      if (node.type === 'processmaker-modeler-pool' && node.definition.processRef) {
-        if (node.definition.processRef.artifacts) {
-          node.definition.processRef.artifacts.forEach(artifact => {
-            const nodeToRemove = this.nodes.find(n => n.definition === artifact);
-            if (nodeToRemove) {
-              this.removeNode(nodeToRemove);
-            }
-          });
-        }
-        if (node.definition.processRef.flowElements) {
-          node.definition.processRef.flowElements.forEach(flowElement => {
-            const nodeToRemove = this.nodes.find(n => n.definition === flowElement);
-            if (nodeToRemove) {
-              this.removeNode(nodeToRemove);
-            }
-          });
-        }
-      }
     },
     handleResize() {
       const { clientWidth, clientHeight } = this.$el.parentElement;
