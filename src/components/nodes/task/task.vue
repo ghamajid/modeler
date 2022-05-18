@@ -22,21 +22,21 @@
 </template>
 
 <script>
-import { util } from 'jointjs';
-import highlightConfig from '@/mixins/highlightConfig';
-import portsConfig from '@/mixins/portsConfig';
-import hasMarkers, { markerSize } from '@/mixins/hasMarkers';
-import TaskShape from '@/components/nodes/task/shape';
-import { taskHeight } from './taskConfig';
-import hideLabelOnDrag from '@/mixins/hideLabelOnDrag';
-import customIcon from '@/mixins/customIcon';
-import CrownConfig from '@/components/crown/crownConfig/crownConfig';
-import { gridSize } from '@/graph';
-import defaultNames from '@/components/nodes/task/defaultNames';
-import boundaryEventDropdownData from '@/components/nodes/boundaryEvent/boundaryEventDropdownData';
-import setupLoopCharacteristicsMarkers from '@/components/nodes/task/setupMultiInstanceMarkers';
-import setupCompensationMarker from '@/components/nodes/task/setupCompensationMarker';
-import { getRectangleAnchorPoint } from '@/portsUtils';
+import { util } from "jointjs";
+import highlightConfig from "@/mixins/highlightConfig";
+import portsConfig from "@/mixins/portsConfig";
+import hasMarkers, { markerSize } from "@/mixins/hasMarkers";
+import TaskShape from "@/components/nodes/task/shape";
+import { taskHeight } from "./taskConfig";
+import hideLabelOnDrag from "@/mixins/hideLabelOnDrag";
+import customIcon from "@/mixins/customIcon";
+import CrownConfig from "@/components/crown/crownConfig/crownConfig";
+import { gridSize } from "@/graph";
+import defaultNames from "@/components/nodes/task/defaultNames";
+import boundaryEventDropdownData from "@/components/nodes/boundaryEvent/boundaryEventDropdownData";
+import setupLoopCharacteristicsMarkers from "@/components/nodes/task/setupMultiInstanceMarkers";
+import setupCompensationMarker from "@/components/nodes/task/setupCompensationMarker";
+import { getRectangleAnchorPoint } from "@/portsUtils";
 
 const labelPadding = 15;
 const topAndBottomMarkersSpace = 2 * markerSize;
@@ -46,43 +46,49 @@ export default {
     CrownConfig,
   },
   props: [
-    'graph',
-    'node',
-    'id',
-    'highlighted',
-    'nodeRegistry',
-    'moddle',
-    'paper',
-    'collaboration',
-    'processNode',
-    'planeElements',
-    'isRendering',
+    "graph",
+    "node",
+    "id",
+    "highlighted",
+    "nodeRegistry",
+    "moddle",
+    "paper",
+    "collaboration",
+    "processNode",
+    "planeElements",
+    "isRendering",
   ],
-  mixins: [highlightConfig, portsConfig, hasMarkers, hideLabelOnDrag, customIcon],
+  mixins: [
+    highlightConfig,
+    portsConfig,
+    hasMarkers,
+    hideLabelOnDrag,
+    customIcon,
+  ],
   data() {
     return {
       shape: null,
       definition: null,
       dropdownData: [
         {
-          label: defaultNames['processmaker-modeler-task'],
-          nodeType: 'processmaker-modeler-task',
-          dataTest: 'switch-to-user-task',
+          label: defaultNames["processmaker-modeler-task"],
+          nodeType: "processmaker-modeler-task",
+          dataTest: "switch-to-user-task",
         },
         {
-          label: defaultNames['processmaker-modeler-manual-task'],
-          nodeType: 'processmaker-modeler-manual-task',
-          dataTest: 'switch-to-manual-task',
+          label: defaultNames["processmaker-modeler-manual-task"],
+          nodeType: "processmaker-modeler-manual-task",
+          dataTest: "switch-to-manual-task",
         },
         {
-          label: defaultNames['processmaker-modeler-script-task'],
-          nodeType: 'processmaker-modeler-script-task',
-          dataTest: 'switch-to-script-task',
+          label: defaultNames["processmaker-modeler-script-task"],
+          nodeType: "processmaker-modeler-script-task",
+          dataTest: "switch-to-script-task",
         },
         {
-          label: defaultNames['processmaker-modeler-call-activity'],
-          nodeType: 'processmaker-modeler-call-activity',
-          dataTest: 'switch-to-sub-process',
+          label: defaultNames["processmaker-modeler-call-activity"],
+          nodeType: "processmaker-modeler-call-activity",
+          dataTest: "switch-to-sub-process",
         },
       ],
       boundaryEventDropdownData,
@@ -91,30 +97,42 @@ export default {
   },
   computed: {
     hasTaskMarker() {
-      return !!this.shape.attr('image/xlink:href');
+      return !!this.shape.attr("image/xlink:href");
     },
   },
   watch: {
-    'node.definition.name'(name) {
+    "node.definition.name"(name) {
       const { width } = this.node.diagram.bounds;
-      this.shape.attr('label/text', util.breakText(name, { width }));
+      this.shape.attr("label/text", util.breakText(name, { width }));
       const { height } = this.shape.size();
 
       const heightByGrid = this.calculateSizeOnGrid();
-      const newHeight = this.useTaskHeight(heightByGrid) ? taskHeight : heightByGrid;
+      const newHeight = this.useTaskHeight(heightByGrid)
+        ? taskHeight
+        : heightByGrid;
       if (height !== newHeight) {
         this.node.diagram.bounds.height = newHeight;
         this.shape.resize(width, newHeight);
         this.recalcMarkersAlignment();
       }
     },
-    'node.definition.isForCompensation'() {
-      setupCompensationMarker(this.node.definition, this.markers, this.$set, this.$delete);
+    "node.definition.isForCompensation"() {
+      setupCompensationMarker(
+        this.node.definition,
+        this.markers,
+        this.$set,
+        this.$delete
+      );
     },
-    'node.definition': {
+    "node.definition": {
       deep: true,
       handler() {
-        setupLoopCharacteristicsMarkers(this.node.definition, this.markers, this.$set, this.$delete);
+        setupLoopCharacteristicsMarkers(
+          this.node.definition,
+          this.markers,
+          this.$set,
+          this.$delete
+        );
       },
     },
   },
@@ -127,9 +145,13 @@ export default {
     },
     calculateSizeOnGrid() {
       const taskGridDifference = gridSize - (taskHeight % gridSize);
-      const labelHeight = Math.floor(this.shapeView.selectors.label.getBBox().height);
+      const labelHeight = Math.floor(
+        this.shapeView.selectors.label.getBBox().height
+      );
       const labelSpace = labelHeight + labelPadding + topAndBottomMarkersSpace;
-      let newHeight = this.paperManager.ceilToNearestGridMultiple(labelSpace) - taskGridDifference;
+      let newHeight =
+        this.paperManager.ceilToNearestGridMultiple(labelSpace) -
+        taskGridDifference;
       if (this.middleIsOddNumber(newHeight)) {
         newHeight += gridSize;
       }
@@ -147,20 +169,33 @@ export default {
     let bounds = this.node.diagram.bounds;
     this.shape.position(bounds.x, bounds.y);
     this.shape.resize(bounds.width, bounds.height);
-    setupCompensationMarker(this.node.definition, this.markers, this.$set, this.$delete);
-    setupLoopCharacteristicsMarkers(this.node.definition, this.markers, this.$set, this.$delete);
+    setupCompensationMarker(
+      this.node.definition,
+      this.markers,
+      this.$set,
+      this.$delete
+    );
+    setupLoopCharacteristicsMarkers(
+      this.node.definition,
+      this.markers,
+      this.$set,
+      this.$delete
+    );
     //console.log(this.node.definition.get('id'),'this.node.definition');
     ///console.log(this.shape,'shape');
     //console.log(this.node.definition.$type,'shape');
-      this.shape.attr({
+    this.shape.attr({
       body: {
         rx: 8,
-        ry: 8
+        ry: 8,
       },
       label: {
-        text: util.breakText(this.node.definition.get('name'), { width: bounds.width }),
-        fill: 'black',
-        element_id_personal: this.node.definition.get('id'),
+        text: util.breakText(this.node.definition.get("name"), {
+          width: bounds.width,
+        }),
+        fill: "black",
+        element_id_personal: this.node.definition.get("id"),
+        element_type_personal: this.node.definition.$type,
       },
     });
     this.shape.addTo(this.graph);
