@@ -15,6 +15,7 @@ function setDefinitionPropertyReactive(definition, key, value) {
   Vue.set(definition, key, value);
 }
 
+
 function removeRef(state, ref, callBack) {
   state.nodes.filter(({ definition }) => (
     definition.$type === 'bpmn:IntermediateCatchEvent' ||
